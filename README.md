@@ -24,7 +24,6 @@ Claude reads the frontmatter at session start and loads the full body only when 
 | Skill | Purpose |
 |---|---|
 | [`meta-prompt`](skills/meta-prompt/) | Turn a vague, conversational task into a high-quality, copy-pastable prompt for another AI (Claude or GPT). Invoked by saying "help me write a prompt", "optimize this for Claude/GPT", or `/mp`. |
-| [`_template`](skills/_template/) | Blank `SKILL.md` template for starting your own skill. |
 
 ## Repository layout
 
@@ -34,8 +33,6 @@ ch-skills/
 ├── LICENSE
 ├── CONTRIBUTING.md
 └── skills/
-    ├── _template/          # Blank skill template — copy and edit
-    │   └── SKILL.md
     └── meta-prompt/        # The flagship skill
         ├── SKILL.md
         ├── references/

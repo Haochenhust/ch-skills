@@ -10,7 +10,7 @@ Thanks for considering a contribution. This repo is a curated collection of Clau
    skills/<skill-name>/SKILL.md
    ```
 
-2. **Start from the template** — copy `skills/_template/SKILL.md` into the new folder and edit.
+2. **Start from an existing skill** — copy `skills/meta-prompt/SKILL.md` as a reference for structure and edit down.
 
 3. **Fill in the frontmatter** — at minimum:
 
