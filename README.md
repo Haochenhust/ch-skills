@@ -19,6 +19,13 @@ Body content — instructions, workflow, examples.
 
 Claude reads the frontmatter at session start and loads the full body only when the skill is triggered.
 
+## Skills in this repo
+
+| Skill | Purpose |
+|---|---|
+| [`meta-prompt`](skills/meta-prompt/) | Turn a vague, conversational task into a high-quality, copy-pastable prompt for another AI (Claude or GPT). Invoked by saying "help me write a prompt", "optimize this for Claude/GPT", or `/mp`. |
+| [`_template`](skills/_template/) | Blank `SKILL.md` template for starting your own skill. |
+
 ## Repository layout
 
 ```
@@ -27,10 +34,14 @@ ch-skills/
 ├── LICENSE
 ├── CONTRIBUTING.md
 └── skills/
-    ├── _template/        # Blank skill template — copy and edit
+    ├── _template/          # Blank skill template — copy and edit
     │   └── SKILL.md
-    └── hello-world/      # Minimal working example
-        └── SKILL.md
+    └── meta-prompt/        # The flagship skill
+        ├── SKILL.md
+        ├── references/
+        │   └── techniques.md
+        └── evals/
+            └── evals.json
 ```
 
 ## Installation
@@ -40,21 +51,21 @@ Pick whichever fits your workflow:
 **Option A — install a single skill**
 
 ```bash
-git clone https://github.com/<your-user>/ch-skills.git /tmp/ch-skills
-cp -r /tmp/ch-skills/skills/hello-world ~/.claude/skills/
+git clone https://github.com/Haochenhust/ch-skills.git /tmp/ch-skills
+cp -r /tmp/ch-skills/skills/meta-prompt ~/.claude/skills/
 ```
 
 **Option B — symlink the whole collection**
 
 ```bash
-git clone https://github.com/<your-user>/ch-skills.git ~/code/ch-skills
-ln -s ~/code/ch-skills/skills/hello-world ~/.claude/skills/hello-world
+git clone https://github.com/Haochenhust/ch-skills.git ~/code/ch-skills
+ln -s ~/code/ch-skills/skills/meta-prompt ~/.claude/skills/meta-prompt
 ```
 
 **Option C — track upstream and pull updates**
 
 ```bash
-git clone https://github.com/<your-user>/ch-skills.git ~/.claude/skills-ch
+git clone https://github.com/Haochenhust/ch-skills.git ~/.claude/skills-ch
 # Then symlink individual skills as needed.
 ```
 

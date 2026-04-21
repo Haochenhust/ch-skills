@@ -1,0 +1,26 @@
+{
+  "skill_name": "meta-prompt",
+  "evals": [
+    {
+      "id": 0,
+      "name": "vague-input-needs-clarification",
+      "prompt": "I want to use the meta-prompt skill to optimize a task description.\n\nRaw request: \"help me write some marketing copy\".\n\nImportant test note: if the skill calls AskUserQuestion during clarification, assume I answer as follows (so you can complete the full workflow and produce the final prompt):\n- Copy type: Xiaohongshu (Little Red Book) outfit-recommendation post\n- Audience: urban female office workers aged 20–30\n- Length: within 300 Chinese characters\n- Style: conversational but tasteful; avoid overt sales voice\n- Input material: no specific product; let the target AI invent one as an example\n- Target AI: Claude (default)\n\nFollow the meta-prompt skill's 5-step workflow and produce the final prompt (with technique notes). Do NOT execute the produced prompt to write the actual copy.",
+      "expected_output": "A Claude-XML-formatted prompt text + technique notes, **without** actual marketing-copy output. Should use role (creator viewpoint), output_format (sub-300-char Xiaohongshu post structure), negative constraints (no salesy tone); may use few-shot.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "clear-input-target-gpt-markdown",
+      "prompt": "I want to use the meta-prompt skill to optimize this task:\n\nRaw request: \"Write me a prompt I'll send to GPT-4. The task: refactor a Python snippet I'll paste later into object-oriented TypeScript, with these requirements: (1) preserve all original comments and translate them into Chinese, (2) use strict mode, (3) use class style rather than interface+function composition, (4) output a single file.\"\n\nMany dimensions are already nailed down. Let the skill decide whether further clarification is needed; if it asks, assume I answer: no additional unit tests needed, no JSDoc comment format needed.\n\nRun the full 5-step workflow and produce the final prompt + technique notes. **Do NOT** actually write the TypeScript code.",
+      "expected_output": "A **Markdown-formatted** prompt text (since target is GPT) + technique notes. Should use ## section headings, delimiter isolation (because the user will paste code), output_format (single file + strict mode + class style), negative constraints (no interface+function, no JSDoc). Should NOT contain XML tags.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "fact-heavy-cov-heavy-techniques",
+      "prompt": "I want to use the meta-prompt skill to optimize this task:\n\nRaw request: \"Write me a prompt that asks an AI to compile the history of Federal Reserve rate hikes over the past 5 years and the market reaction. Must be reliable — no making things up.\"\n\nTest note: if the skill asks clarifying questions, assume I answer:\n- Audience: internal investment-research team reference\n- Output format: one table listing each hike (date / size / backdrop) + a paragraph per hike analyzing the reaction in US equities and Treasuries\n- Target AI: Claude\n- Time range: 2020 to present (past 5 years)\n\nRun the full 5-step workflow and produce the final prompt + technique notes. **Do NOT** actually compile the Fed data.",
+      "expected_output": "A Claude-XML-formatted prompt text + technique notes. Should clearly apply Chain-of-Verification (because the user said 'no making things up'), role (senior macro analyst), output_format (table + paragraphs), negative constraints (no fabrication, no uncited numbers). The technique notes should explain why CoV was chosen.",
+      "files": []
+    }
+  ]
+}
