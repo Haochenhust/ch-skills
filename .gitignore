@@ -1,0 +1,28 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/
+
+# Claude Code local state
+.claude/settings.local.json
+.claude/cache/
+.claude/logs/
+.claude/projects/
+
+# Environment
+.env
+.env.local
+
+# OS/tool noise
+Thumbs.db
+*.log
+node_modules/
