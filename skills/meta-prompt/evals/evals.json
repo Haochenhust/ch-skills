@@ -4,22 +4,22 @@
     {
       "id": 0,
       "name": "vague-input-needs-clarification",
-      "prompt": "I want to use the meta-prompt skill to optimize a task description.\n\nRaw request: \"help me write some marketing copy\".\n\nImportant test note: if the skill calls AskUserQuestion during clarification, assume I answer as follows (so you can complete the full workflow and produce the final prompt):\n- Copy type: Xiaohongshu (Little Red Book) outfit-recommendation post\n- Audience: urban female office workers aged 20–30\n- Length: within 300 Chinese characters\n- Style: conversational but tasteful; avoid overt sales voice\n- Input material: no specific product; let the target AI invent one as an example\n- Target AI: Claude (default)\n\nFollow the meta-prompt skill's 5-step workflow and produce the final prompt (with technique notes). Do NOT execute the produced prompt to write the actual copy.",
-      "expected_output": "A Claude-XML-formatted prompt text + technique notes, **without** actual marketing-copy output. Should use role (creator viewpoint), output_format (sub-300-char Xiaohongshu post structure), negative constraints (no salesy tone); may use few-shot.",
+      "prompt": "我想用 meta-prompt skill 帮我优化一段任务描述。\n\n原始需求：「帮我写个文案」。\n\n重要测试说明：如果 skill 在澄清阶段调用 AskUserQuestion 或需要我回答问题，请假设我的回答如下（这是为了让你能跑完整个流程并产出最终 prompt）：\n- 文案类型：小红书穿搭推荐贴文\n- 受众：20-30 岁都市女白领\n- 长度：300 字以内\n- 风格：口语化但要有品位，不要露骨营销感\n- 输入素材：没有具体产品，让目标 AI 自己举一个例子\n- 目标 AI：Claude（默认）\n\n请按 meta-prompt skill 的 5 步工作流产出最终 prompt（含技巧说明）。不要执行这段 prompt 去写文案。",
+      "expected_output": "一段 Claude XML 格式的 prompt 文本 + 技巧说明，**不包含**实际的文案输出。应该使用 role（创作者视角）、output_format（300 字内小红书贴文结构）、negative constraints（不要营销感），可能用 few-shot。",
       "files": []
     },
     {
       "id": 1,
       "name": "clear-input-target-gpt-markdown",
-      "prompt": "I want to use the meta-prompt skill to optimize this task:\n\nRaw request: \"Write me a prompt I'll send to GPT-4. The task: refactor a Python snippet I'll paste later into object-oriented TypeScript, with these requirements: (1) preserve all original comments and translate them into Chinese, (2) use strict mode, (3) use class style rather than interface+function composition, (4) output a single file.\"\n\nMany dimensions are already nailed down. Let the skill decide whether further clarification is needed; if it asks, assume I answer: no additional unit tests needed, no JSDoc comment format needed.\n\nRun the full 5-step workflow and produce the final prompt + technique notes. **Do NOT** actually write the TypeScript code.",
-      "expected_output": "A **Markdown-formatted** prompt text (since target is GPT) + technique notes. Should use ## section headings, delimiter isolation (because the user will paste code), output_format (single file + strict mode + class style), negative constraints (no interface+function, no JSDoc). Should NOT contain XML tags.",
+      "prompt": "我想用 meta-prompt skill 优化这段任务：\n\n原始需求：「帮我写个 prompt 发给 GPT-4，任务是把我后续贴进去的一段 Python 代码重构成面向对象的 TypeScript，要求：(1) 保留所有原注释并翻译成中文，(2) 使用 strict mode，(3) 用 class 风格而不是 interface+function 组合，(4) 输出单文件。」\n\n这个需求里很多维度已经明确了。请让 skill 判断是否还需要澄清，如果需要，假设我回答：不需要额外单元测试，不需要 JSDoc 注释格式。\n\n按 skill 5 步流程产出最终 prompt + 技巧说明。**不要**真的去写 TypeScript 代码。",
+      "expected_output": "一段 **Markdown 格式**（因为目标是 GPT）的 prompt 文本 + 技巧说明。应该使用 ## 标题分节、delimiter 隔离（因为用户要贴代码）、output_format（单文件 + strict mode + class 风格）、negative constraints（不要 interface+function、不要 JSDoc）。不应出现 XML 标签。",
       "files": []
     },
     {
       "id": 2,
       "name": "fact-heavy-cov-heavy-techniques",
-      "prompt": "I want to use the meta-prompt skill to optimize this task:\n\nRaw request: \"Write me a prompt that asks an AI to compile the history of Federal Reserve rate hikes over the past 5 years and the market reaction. Must be reliable — no making things up.\"\n\nTest note: if the skill asks clarifying questions, assume I answer:\n- Audience: internal investment-research team reference\n- Output format: one table listing each hike (date / size / backdrop) + a paragraph per hike analyzing the reaction in US equities and Treasuries\n- Target AI: Claude\n- Time range: 2020 to present (past 5 years)\n\nRun the full 5-step workflow and produce the final prompt + technique notes. **Do NOT** actually compile the Fed data.",
-      "expected_output": "A Claude-XML-formatted prompt text + technique notes. Should clearly apply Chain-of-Verification (because the user said 'no making things up'), role (senior macro analyst), output_format (table + paragraphs), negative constraints (no fabrication, no uncited numbers). The technique notes should explain why CoV was chosen.",
+      "prompt": "我想用 meta-prompt skill 优化这个任务：\n\n原始需求：「帮我写个 prompt，让 AI 整理最近 5 年美联储加息的历史数据和市场反应，要可靠、不要瞎编」。\n\n测试说明：如果 skill 要澄清，假设我的回答：\n- 受众：投资研究团队内部参考\n- 输出格式：一张表格列每次加息（日期/幅度/背景）+ 每次加息后美股美债的市场反应分析段落\n- 目标 AI：Claude\n- 时间范围：2020 至今（最近 5 年）\n\n按 skill 5 步流程产出最终 prompt + 技巧说明。**不要**真的去整理美联储数据。",
+      "expected_output": "一段 Claude XML 格式的 prompt 文本 + 技巧说明。应该明显使用 Chain-of-Verification（因为用户说'不要瞎编'）、role（资深宏观分析师）、output_format（表格+段落结构）、negative constraints（不要瞎编、不要无来源引用）。技巧说明里应该解释为什么选了 CoV。",
       "files": []
     }
   ]

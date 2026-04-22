@@ -1,114 +1,114 @@
 ---
 name: meta-prompt
-description: Turn a vague, conversational task description into a high-quality, copy-pastable prompt for another AI session. **Use this skill** when the user says things like "help me optimize a prompt", "how should I ask AI this", "write me a prompt I can paste into GPT/Claude", "package this into a prompt", "meta prompt", or when they explicitly invoke `/mp`. Produces Claude-friendly XML-structured prompts by default; switches to markdown sections when the user says the target is GPT/ChatGPT/OpenAI. **Do NOT execute the produced prompt in the current session — only output the prompt text for the user to copy.**
+description: 把用户口语化/模糊的任务描述转成一段高质量、可直接复制到其他 AI 会话使用的 prompt。**必须用此 skill**当用户说「帮我优化 prompt」「这段任务怎么问 AI 更好」「写一个 prompt 我发给 GPT/Claude」「帮我写 prompt」「把这个需求包装成 prompt」「meta prompt」，或者显式调用 `/mp`。默认产出 Claude 友好的 XML 结构化 prompt，当用户指定目标是 GPT/ChatGPT/OpenAI 时切换为 markdown 分节格式。**不要在当前会话执行产出的 prompt，只输出 prompt 文本给用户复制**。
 ---
 
 # Meta-Prompt Skill
 
-## Scope & boundaries
+## 定位与边界
 
-**What it does**: Takes a raw task description from the user (one sentence to a paragraph), asks the minimum set of clarifying questions, selectively applies prompt-engineering techniques, and outputs a **complete, structured, copy-pastable** high-quality prompt for the user to use in another AI session.
+**做什么**：接收用户一段原始任务描述（可以是一句话到一大段话），通过最少的澄清问题 + 按需叠加的 prompt engineering 技巧，输出一段**完整、结构化、可直接复制**到其他 AI 会话使用的高质量 prompt。
 
-**What it does NOT do (strict)**:
-- **Do not execute** the produced prompt. The user wants the prompt text itself, not the task result. Even if the produced prompt looks trivial, even if "just doing the task" feels more helpful — don't. This is the single biggest failure mode for this skill.
-- Not production prompt engineering (safety guardrails, A/B evals, versioning, consistency testing are out of scope).
-- Not long-horizon task planning — if the user clearly wants a multi-step implementation plan, point them at `writing-plans` instead.
+**不做什么（严格）**：
+- **不执行**产出的 prompt。用户要的是 prompt 文本本身，不是任务结果。哪怕产出的 prompt 看起来很简单、哪怕你以为顺手做掉更贴心——都不要做。这是这个 skill 最容易踩的坑。
+- 不做面向产品的 prompt 工程（安全护栏、A/B 评估、版本管理、一致性测试都不在范围内）。
+- 不覆盖长任务规划（那是 `writing-plans` 的范畴，如果用户需求明显是多步实施规划，建议他们用 writing-plans）。
 
-**Why**: Users routinely get "off the mark" answers from AI — wrong emphasis, wrong format, wrong viewpoint. ~90% of the time the root cause is missing context and fuzzy constraints, not model weakness. This skill does the "help the user express the task clearly" job well, and leaves the rest to the target AI.
+**为什么**：用户常常在对话里"不得要领"——AI 理解不到重点、格式不对、视角不对。根因 90% 是上下文缺失和约束模糊，不是模型不够强。这个 skill 把"帮用户把任务表达清楚"这件事做好，剩下的交给目标 AI。
 
-## Language
+## 全程中文
 
-Interact with the user in their language (clarification questions, technique explanations, delivery notes). The **produced prompt itself** should match the natural language of the user's raw task — if the raw input is English, write the prompt in English; if Chinese, write it in Chinese. Don't translate the raw input; just match it.
+与用户的所有交互（澄清问题的措辞、技巧说明、交付说明）都用中文。产出的 prompt 本身按目标 AI 使用场景的自然语言——用户任务描述是中文就用中文写 prompt，是英文就用英文。
 
-## Workflow (follow strictly in order)
+## 工作流（严格按顺序）
 
-### Step 1 — Intent parsing
+### Step 1 — 意图解析
 
-Read the user's raw input. Scan it against the following 7 dimensions, tagging each internally as ✓ known / ✗ missing / ⚠️ ambiguous:
+读入用户原始输入，按以下 7 维度扫描，心里给每一维标记 ✓ 已知 / ✗ 缺失 / ⚠️ 歧义：
 
-| Dimension | What to check |
+| 维度 | 判断要点 |
 |---|---|
-| Goal | What deliverable does the user want? |
-| Audience / use case | Who will see the output, in what situation? |
-| Input data / context | Any source material to feed the target AI? (text, data, code…) |
-| Constraints | Length, style, language, forbidden items, must-include items |
-| Output format | Text / JSON / list / table / code / markdown sections… |
-| Success criteria | What counts as "good"? Implicit quality bar |
-| Target AI | Claude (default) / GPT / Gemini / other |
+| 目标 | 用户最终想拿到什么可交付物？ |
+| 受众/使用场景 | 产物给谁看、用在什么场景？ |
+| 输入数据或上下文 | 有没有素材要喂给目标 AI？（文本、数据、代码…） |
+| 约束条件 | 字数、风格、语言、禁用项、必须包含项 |
+| 输出格式 | 文本/JSON/列表/表格/代码/markdown 分节… |
+| 成功标准 | 什么样算好？用户隐含的质量门槛 |
+| 目标 AI | Claude（默认）/ GPT / Gemini / 其他 |
 
-**Why these 7**: This is the minimum sufficient set to characterize a task. Miss one and the prompt will under-specify; add more and you're over-engineering.
+**为什么这 7 维**：这是勾勒一个任务的最小充分集。少一维 prompt 就会漏信息，多一维就是过度工程。
 
-### Step 2 — Dynamic clarification (use AskUserQuestion)
+### Step 2 — 动态澄清（用 AskUserQuestion）
 
-Ask about ✗ missing / ⚠️ ambiguous dimensions only, in **one batched AskUserQuestion call**:
+只问 ✗ 缺失 / ⚠️ 歧义的维度，**一次性批量**用 AskUserQuestion 工具提出：
 
-- Number of questions: 1–4. Needing more than 4 means you didn't squeeze enough signal out of the raw input — go back to Step 1 and re-read.
-- Each question should offer 3–4 **concrete, selectable** options plus "Other (please specify)". Avoid vague adjective-level options like "detailed" / "concise"; use quantified anchors like "<200 word brief" / "300–500 words" / "1+ page detailed".
-- **Do NOT** re-ask dimensions already nailed down. "Write a Python function" already implies code output format — don't ask again.
-- If the raw input is already very clear (at least 5 of 7 dimensions ✓), **skip Step 2 entirely**.
+- 问题数量：1–4 个。超过 4 说明你还没把原始输入榨干，先回 Step 1 再读一遍。
+- 每题给 3–4 个**具体、可选中**的选项 + "其他（请说明）"。不要给"详细"/"简洁"这种形容词级选项，要给"<200 字简报"/"300-500 字"/"1 页以上详细"这种有量化锚点的选项。
+- **不要**问已经明确的维度。用户输入里"写个 Python 函数"已经暗示代码输出格式了，就别再问。
+- **原始输入已经非常清晰时**（7 维里至少 5 维 ✓），直接跳过 Step 2。
 
-**Why clarify instead of rewrite**: The user's daily pain is "AI didn't understand me," which is 90% missing context and only 10% phrasing. Clarification fills in the context directly; rewriting only makes the language prettier.
+**为什么澄清而不改写**：用户的日常痛点是"AI 没理解我"，90% 是上下文缺失，10% 是表达问题。澄清直接补上下文，改写只在语言层面化妆。
 
-### Step 3 — Technique selection
+### Step 3 — 技巧选择
 
-Based on the task profile, pick techniques from the menu below. **More is not better** — for each technique you pick, be able to articulate "why this one." The index is below; concrete templates and trigger conditions live in `references/techniques.md` (read that file when you need the actual template snippet):
+根据任务画像从下列菜单挑选技巧。**不是越多越好**——每个技巧都要能说出"为什么选它"。索引如下，详细模板和触发条件见 `references/techniques.md`（需要具体模板片段时再读）：
 
-| Technique | One-line trigger |
+| 技巧 | 一句话触发条件 |
 |---|---|
-| Role assignment | Task benefits noticeably from a specific professional viewpoint (engineer / lawyer / editor / teacher…) |
-| Chain-of-Thought | Multi-step reasoning, calculation, decision, causal analysis |
-| Few-shot examples | Format/style is unusual enough that words can't capture it, but examples can in one glance |
-| Self-consistency | Open-ended output with high variance — generate N candidates and pick |
-| Step-back prompting | Need to abstract principles first, then apply to the concrete case |
-| Chain-of-Verification | Fact-dense output where hallucination risk is real (history, stats, citations) |
-| Decomposition | Task naturally splits into multiple deliverables; separate treatment improves quality |
-| XML structured tags | **Claude default.** Essential for multi-field input and long context |
-| Markdown sections | **GPT default.** GPT attends more reliably to markdown headings |
-| Output schema | Output will be parsed by code (JSON, CSV, fixed template) |
-| Negative constraints | Known failure modes to avoid ("do not X") |
-| Delimiter isolation | User data may contain content that looks like instructions |
+| Role assignment | 任务从特定领域视角做会明显更好（技术/法律/编辑/教师等） |
+| Chain-of-Thought | 涉及多步推理、计算、决策、因果分析 |
+| Few-shot examples | 格式/风格很特殊，光描述说不清，样例能一秒说清 |
+| Self-consistency | 答案方差大的开放题，让模型生成 N 个候选再挑 |
+| Step-back prompting | 需要先抽象原则再套具体案例，避免模型一头扎进细节 |
+| Chain-of-Verification | 事实性输出，容易幻觉的话题（历史、数据、引用） |
+| Decomposition | 任务天然有多个子可交付物，拆开回答质量更高 |
+| XML 结构化标签 | **Claude 默认开启**，多字段输入、长上下文时尤其关键 |
+| Markdown 分节 | **GPT 默认用**，GPT 对 markdown 标题更敏感 |
+| Output schema | 产出要被程序解析（JSON、CSV、固定表格结构） |
+| Negative constraints | 有明确的失败模式要避免（"不要 xxx"） |
+| Delimiter 隔离 | 用户数据里可能混入貌似指令的内容 |
 
-**Counterintuitive note**: Simple tasks only need Role + XML/Markdown structure. Stacking CoT/CoV on top of a trivial task makes the prompt long and noisy — which dilutes the signal. Only add techniques the task genuinely needs.
+**技巧选择的反直觉点**：简单任务可以只用 Role + XML/Markdown 结构化，强行叠 CoT/CoV 会让 prompt 又长又绕，反而稀释关键信息。只在任务真正需要时加。
 
-### Step 4 — Assemble the prompt
+### Step 4 — 组装 prompt
 
-**Claude default template (XML)**:
+**Claude 默认模板（XML）**：
 
 ```xml
 <role>
-...One to two sentences: professional identity + working style. Omit entirely if the task doesn't need a role viewpoint.
+...一到两句，角色定位 + 风格。省略此段如果任务不需要角色视角。
 </role>
 
 <task>
-...One sentence stating what the user wants.
+...一句话讲清用户要什么。
 </task>
 
 <context>
-<!-- Material and background the user provided. Use sub-tags for further structure -->
+<!-- 用户提供的素材、背景信息。用子标签进一步结构化 -->
 </context>
 
 <constraints>
-- Constraint 1
-- Constraint 2
+- 约束 1
+- 约束 2
 </constraints>
 
 <output_format>
-...Specific enough to write from. If there's a schema, paste the schema.
+...具体到可落笔的格式描述。有 schema 就贴 schema。
 </output_format>
 
 <examples>
-<!-- Only when using few-shot -->
+<!-- 仅在用 few-shot 时 -->
 <good>...</good>
 <bad>...</bad>
 </examples>
 
 <reasoning_instructions>
-<!-- Only when using CoT / CoV / Step-back -->
-First X, then Y, finally Z.
+<!-- 仅在用 CoT/CoV/Step-back 时 -->
+先 X，再 Y，最后 Z。
 </reasoning_instructions>
 ```
 
-**GPT template (Markdown, use when the user specifies GPT / ChatGPT / OpenAI)**:
+**GPT 模板（Markdown，用户指定 GPT/ChatGPT/OpenAI 时用）**：
 
 ```markdown
 ## Role
@@ -127,127 +127,127 @@ First X, then Y, finally Z.
 ...
 
 ## Examples
-...(when using few-shot)
+...（如用 few-shot）
 
 ## Reasoning Steps
-...(when using CoT / CoV)
+...（如用 CoT/CoV）
 ```
 
-**Assembly principles**:
-- Keep the section order above. Delete empty sections rather than leaving empty tags behind.
-- Every section content must be "as concrete as possible". Constraint = "300–500 words", not "concise". Format = "markdown with three sections: Progress / Risks / Plan", not "structured".
-- User-provided raw material goes inside `<context>` sub-tags (Claude) or fenced blocks under `## Context` (GPT), to prevent it from colliding with the instructions.
+**组装原则**：
+- 模块按上述顺序排布，空段落删掉别留空标签。
+- 每段内容"尽量具体"。约束是"字数 300-500"而不是"简洁"，格式是"markdown 分三节：进展/风险/计划"而不是"结构化"。
+- 用户提供的原始素材放在 `<context>` 下的子标签里（Claude）或 `## Context` 代码块里（GPT），防止和指令混淆。
 
-### Step 5 — Delivery
+### Step 5 — 交付
 
-Your output to the user MUST include these three parts, in this order:
+输出给用户的内容**必须**包含这三部分，顺序如下：
 
-1. **The produced prompt**: wrap it in a ```markdown``` (GPT) or ```xml``` (Claude) code block so the user can copy it in one click.
-2. **Technique notes**: 3–5 lines under the code block, stating which techniques you used, why you picked them, and **why you did NOT pick other techniques that also look relevant**. This last part forces you to justify your judgment instead of stacking techniques blindly.
-3. **Usage tip** (optional, 1–2 lines): if the prompt contains placeholders (e.g. `{{raw_notes}}`), remind the user to substitute; or suggest how to use it in the target AI ("paste this as the first message in your Claude conversation").
+1. **产出的 prompt**：用 ````markdown`（如果是 GPT 版本）或 ````xml`（Claude 版本）代码块包裹，方便用户一键复制。
+2. **技巧说明**：代码块下方 3-5 行，说清本次用了哪些技巧、为什么选这些、**为什么没选其他看起来也相关的技巧**（这一点能让用户理解你的判断、也帮助你自己避免无脑堆技巧）。
+3. **使用提示**（可选，1-2 行）：如果 prompt 里留了占位符（如 `{{raw_notes}}`）提醒用户替换；或者推荐在目标 AI 里如何配合使用（比如"建议贴在 Claude 对话框第一条"）。
 
-**Never do**:
-- Don't say "let me also run it and show you the output."
-- Don't append your own answer to the task at the end.
-- Don't ask "want me to run this prompt for you now?" — the user wants the prompt text; offering to execute interrupts their workflow.
+**绝不要做**：
+- 不要说"我顺便帮你执行一下看看效果"
+- 不要在最后贴一段自己对这个任务的回答
+- 不要追加"你要我现在就用这个 prompt 帮你做一下吗？"——用户要的就是 prompt 文本，主动执行会打断他的工作流
 
-## End-to-end example
+## 端到端示例
 
-**User input**: `/mp help me write a weekly update`
+**用户输入**：`/mp 帮我写个周报`
 
-**Step 1 (intent parsing)**:
-- ✗ Goal (weekly update for whom, what cadence)
-- ✗ Audience
-- ✗ Input data (does the user have material)
-- ✗ Constraints (length, style)
-- ✗ Output format
-- ⚠️ Success criteria (implied by "weekly update" but not explicit)
-- ✓ Target AI (default Claude)
+**Step 1（意图解析）**：
+- ✗ 目标（周报给谁、什么周期）
+- ✗ 受众
+- ✗ 输入数据（用户有没有素材）
+- ✗ 约束（长度、风格）
+- ✗ 输出格式
+- ⚠️ 成功标准（"周报"隐含但不明确）
+- ✓ 目标 AI（默认 Claude）
 
-→ 5 dimensions missing. Must clarify.
+→ 5 维缺失，必须澄清。
 
-**Step 2 (clarification, one AskUserQuestion call)**:
+**Step 2（澄清，AskUserQuestion 一次批量问）**：
 
-- Q1: Who is the weekly update for? [ Direct manager / Full team / Cross-team sync / Other ]
-- Q2: What raw material do you have? [ Git commit history / Handwritten notes / Meeting notes / Nothing, generate from scratch / Other ]
-- Q3: What format do you want? [ Markdown with sections / Bullet list / Flowing prose paragraphs / Other ]
-- Q4: Length? [ <200 word brief / 300–500 words / 1+ page detailed / Other ]
+- Q1：周报给谁看？[ 直属 leader / 整个 team / 跨部门同步 / 其他 ]
+- Q2：你手头有什么素材？[ git 提交记录 / 手写笔记 / 会议纪要 / 什么都没，从零生成思路 / 其他 ]
+- Q3：想要什么格式？[ markdown 分节 / bullet 列表 / 连贯段落叙述 / 其他 ]
+- Q4：篇幅？[ <200 字简报 / 300-500 字 / 1 页+ 详细 / 其他 ]
 
-**Assume the user answers**: Direct manager / git + handwritten notes / markdown sections / 300–500 words.
+**假设用户答**：直属 leader / git + 手写笔记 / markdown 分节 / 300-500 字。
 
-**Step 3 (technique selection)**:
-- Role assignment ✓: "engineering manager" viewpoint helps judge what a manager cares about
-- XML ✓: Claude default
-- Output schema ✓: fixed 3 sections (This week / Risks / Next week)
-- Few-shot ✓: weekly updates have a specific "good bullet" vs "trivia dump" flavor; one good + one bad example settles it fast
-- Negative constraints ✓: the canonical failure mode is trivia dumps + unexplained jargon
-- Not CoT: writing a weekly update isn't a reasoning task
-- Not CoV: content comes from user material, hallucination risk is low
-- Not Decomposition: 3 sections is already natural decomposition, no further split needed
+**Step 3（技巧选择）**：
+- Role assignment ✓：技术经理视角能把握"leader 关心什么"
+- XML ✓：Claude 默认
+- Output schema ✓：固定 3 节（本周进展/风险/下周计划）
+- Few-shot ✓：周报的"好 bullet"和"罗列琐事"差别大，一组正反例最省话
+- Negative constraints ✓：周报最大通病就是罗列细节、堆 jargon
+- 不用 CoT：生成周报不是推理题
+- 不用 CoV：内容来自用户素材，幻觉风险低
+- 不用 Decomposition：3 节已经是自然分解，不需要再拆
 
-**Step 4 (assembled prompt, delivered to user)**:
+**Step 4（组装的 prompt，交付给用户）**：
 
 ````xml
 <role>
-You are a senior engineering manager, skilled at turning a software engineer's scattered work notes into a concise weekly update for their direct manager. You know what a manager actually cares about (impact, risks, plans), and you have a visceral aversion to trivia dumps.
+你是一位资深技术经理，擅长把工程师的零散工作记录整理成面向直属 leader 的简洁周报。你熟悉 leader 真正关心什么（影响力、风险、规划），对罗列琐事有本能抗拒。
 </role>
 
 <task>
-Based on the material I provide, write a weekly update.
+基于我提供的素材，生成一份本周周报。
 </task>
 
 <context>
 <raw_notes>
-{{paste your git log + handwritten notes here}}
+{{在这里粘贴你的 git log 和手写笔记}}
 </raw_notes>
 
-<audience>Direct engineering manager; cares about project progress, risks, next week's plan.</audience>
+<audience>直属技术 leader，关心项目进度、风险、下周规划</audience>
 </context>
 
 <constraints>
-- Only include work with manager-level significance; merge or drop trivia
-- Describe impact in business language; no unexplained jargon
-- Every risk must include a mitigation or ask for help, never a bare problem
-- 300–500 words
+- 只选有 leader 层级影响的工作，琐事合并或丢弃
+- 用业务语言描述影响，不出现没解释的技术 jargon
+- 提到风险必须附缓解方案或求助点,不能只抛问题
+- 300-500 中文字
 </constraints>
 
 <output_format>
-Exactly three sections with `##` headings:
+严格三节，用 `##` 标题：
 
-## This week's progress
-- Each bullet: what you did + quantified impact
-- 3–5 bullets
+## 本周进展
+- 每条 bullet 结构：做了什么 + 带数字的影响
+- 3-5 条
 
-## Risks & blockers
-- Each: problem + mitigation / support needed
-- 0–3 bullets (write "none" if none)
+## 风险 & 阻塞
+- 每条：问题 + 缓解方案 / 需要的支持
+- 0-3 条（没有就写"无"）
 
-## Next week's plan
-- Deliverable goals, not a list of activities
-- 2–4 bullets
+## 下周计划
+- 可交付目标，不要罗列活动
+- 2-4 条
 </output_format>
 
 <examples>
 <good>
-Shipped the recommendation traffic migration — new path absorbed 100% of traffic with zero incidents. Raised QPS ceiling 3x vs old path, giving us runway for the holiday scale-up.
+完成推荐流量迁移，新链路承接全量流量零故障；相比旧链路 QPS 上限提升 3 倍，为双十一扩容留出余量。
 </good>
 
 <bad>
-This week I did a lot of things, including PR #123, #124, #125, and sat in a few meetings about next quarter's planning.
+本周做了很多事情，包括 PR #123、#124、#125，还开了几个会讨论下季度规划。
 </bad>
 </examples>
 ````
 
-**Technique notes**: Used Role (engineering manager viewpoint for impact calibration), XML (Claude-native structure), Output schema (fixed 3-section layout), Few-shot (weekly-update tone is specific; one positive + one negative example anchors it), Negative constraints (the common failure modes are trivia dumps and jargon). Skipped CoT because a weekly update isn't a reasoning task; skipped CoV because content is user-sourced, hallucination risk is low.
+**技巧说明**：用了 Role（技术经理视角把握 impact 判断）+ XML 结构化（Claude 友好）+ Output schema（3 节固定结构）+ Few-shot（周报语气特殊，一正一反对比帮模型校准）+ Negative constraints（周报最大通病是罗列琐事和堆 jargon）。没用 CoT 因为周报不是推理题，没用 CoV 因为内容来自你的素材，幻觉风险低。
 
-**Usage tip**: Replace `{{raw_notes}}` with your actual material, then paste the whole block as the first message in a new Claude conversation.
+**使用提示**：把 `{{raw_notes}}` 替换成你的实际素材后，整段贴给 Claude 即可。
 
-## Final self-check
+## 关键自我检查清单
 
-Before delivering, run through this:
+产出之前对自己过一遍：
 
-- [ ] Are all my clarification questions about ✗ dimensions? Any duplicates?
-- [ ] For each technique I picked, can I articulate a specific "why"?
-- [ ] Does the prompt contain any constraint I invented but the user never mentioned? (If yes, remove or mark it as a suggestion.)
-- [ ] Did I use the right code-block language (xml vs markdown)?
-- [ ] **Did I accidentally execute the prompt at the end?** (If yes, delete it — only deliver the prompt text.)
+- [ ] 我问的澄清问题是否都是 ✗ 维度？有没有问重复？
+- [ ] 每个选用的技巧能说出具体"为什么"吗？
+- [ ] prompt 里有没有用户输入里没提过、我自己脑补出来的约束？（有的话去掉或明确标注是建议）
+- [ ] 代码块用对了 xml / markdown 语言标记？
+- [ ] **我有没有在最后忍不住把这个 prompt 执行了一遍？**（如有，删掉，只交付 prompt 文本）
