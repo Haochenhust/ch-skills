@@ -1,0 +1,33 @@
+{
+  "skill_name": "marxist-method-for-action",
+  "evals": [
+    {
+      "id": 0,
+      "name": "company-research",
+      "prompt": "我想调研一下拼多多(PDD)现在是否值得买入持有。帮我写一份调研框架:你会怎么调研这家公司、重点看哪些变量、关键假设是什么、如何验证、最后给出买入/观望/规避的决策标准。在你已知的公开信息范围内给出实质分析,不要套空洞模板。控制在 1500 字以内。",
+      "expected_output": "A research framework that demonstrates empirical rigor: identifies the 1-2 primary variables driving PDD (e.g., Temu margin vs growth tradeoff, domestic take-rate), uses verifiable data checkpoints rather than templates, presents explicit bull and bear cases with falsifiable triggers, considers supply chain/policy context, gives a clear decision rule not mushy conclusions.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "architecture-choice",
+      "prompt": "我们是一个 3 人小团队的 Go 后端,当前单体服务,线上大约 50 QPS,PostgreSQL + Redis。老板看大厂都搞微服务,想让我们也切过去。帮我分析:要不要切?如果要切怎么切入?如果不切怎么跟老板沟通?控制在 1200 字以内。",
+      "expected_output": "Analysis that anchors on the specific context (3 people, 50 QPS), identifies the true tradeoff at this scale (complexity cost vs actual benefit), does not reflexively recommend 'best practice', presents both sides honestly, considers 6-18 month trajectory rather than only static snapshot.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "bug-triage",
+      "prompt": "场景:一个 Go 后端服务,从昨晚 11 点开始 P99 延迟从 200ms 飙到 2s。没有发版、CPU/内存/QPS 都正常、数据库慢查询没明显变化。请帮我制定一个系统性排查方案——先查什么、后查什么、怎么快速定位根因。控制在 1000 字以内。",
+      "expected_output": "Structured triage that prioritizes empirical evidence (what to run first), uses A/B comparison thinking (what changed between 10pm healthy and 11pm broken), identifies primary suspect layers (lock/GC/network/downstream) before drilling, avoids shotgun guessing.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "housing-decision",
+      "prompt": "帮我分析今年(2026)能不能在北京买房。关键 context:我是京籍首套资格(北京户口,名下无房);在字节海淀办公(知春路/中关村);妻子在北京上班;2025 年 11 月刚出生一个孩子(现在 5 个月);总预算 400-700 万(含首付+贷款);主要诉求是首套自住 + 学区刚需(希望孩子将来能上海淀优质小学);时间弹性是年内优先,但可以推 6-12 个月。请给出具体可执行的分析,包括:要不要买、买什么板块、主攻方向、风险、下一步行动。不要泛泛而谈,要具体到板块、数字、行动清单。控制在 3000 字以内。",
+      "expected_output": "Analysis that: (1) investigates with concrete data — real policies, price ranges, school district specifics, not generic advice; (2) identifies the true main contradiction in user's situation (budget vs central district vs school district vs commute) and how it may transition; (3) maps stakeholders (seller/agent/bank/government) and their interests; (4) commits to ONE primary recommendation (not three balanced options), with trigger conditions and falsifiers; (5) includes a concrete worst-case scenario with playbook; (6) gives week-by-week actionable next steps; (7) notes active levers (policy/channel/negotiation) the user can pull, not just passive choices.",
+      "files": []
+    }
+  ]
+}
