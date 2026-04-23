@@ -24,6 +24,7 @@ Claude reads the frontmatter at session start and loads the full body only when 
 | Skill | Purpose |
 |---|---|
 | [`meta-prompt`](skills/meta-prompt/) | Turn a vague, conversational task into a high-quality, copy-pastable prompt for another AI (Claude or GPT). Invoked by saying "help me write a prompt", "optimize this for Claude/GPT", or `/mp`. |
+| [`marxist-method-for-action`](skills/marxist-method-for-action/) | Rigorous problem-analysis methodology for substantive decisions (housing, career, medical, investment, tech/architecture, debugging, …). Six base principles plus nine Mao-style operational hooks (investigation circle, stakeholder mapping, main-contradiction transition, staged strategy, worst-case wargaming, concentrated main attack, active levers, typical-case deep-dive). Invoked by `/mma` or phrases like 用马哲分析 / 用毛选方法 / 矛盾分析一下 / 实事求是地看. |
 
 ## Repository layout
 
@@ -33,10 +34,20 @@ ch-skills/
 ├── LICENSE
 ├── CONTRIBUTING.md
 └── skills/
-    └── meta-prompt/        # The flagship skill
+    ├── meta-prompt/                 # Prompt optimizer
+    │   ├── SKILL.md
+    │   ├── references/
+    │   │   └── techniques.md
+    │   └── evals/
+    │       └── evals.json
+    └── marxist-method-for-action/   # Decision-analysis methodology
         ├── SKILL.md
         ├── references/
-        │   └── techniques.md
+        │   ├── mao-playbook.md
+        │   ├── domain-examples.md
+        │   └── before-after-case-studies.md
+        ├── scripts/
+        │   └── context_questions.py
         └── evals/
             └── evals.json
 ```
