@@ -25,6 +25,9 @@ Claude reads the frontmatter at session start and loads the full body only when 
 |---|---|
 | [`meta-prompt`](skills/meta-prompt/) | Turn a vague, conversational task into a high-quality, copy-pastable prompt for another AI (Claude or GPT). Invoked by saying "help me write a prompt", "optimize this for Claude/GPT", or `/mp`. |
 | [`marxist-method-for-action`](skills/marxist-method-for-action/) | Rigorous problem-analysis methodology for substantive decisions (housing, career, medical, investment, tech/architecture, debugging, …). Six base principles plus nine Mao-style operational hooks (investigation circle, stakeholder mapping, main-contradiction transition, staged strategy, worst-case wargaming, concentrated main attack, active levers, typical-case deep-dive). Invoked by `/mma` or phrases like 用马哲分析 / 用毛选方法 / 矛盾分析一下 / 实事求是地看. |
+| [`industry-chain-research`](skills/industry-chain-research/) | 产业链研究：从宏观趋势拆解产业链、定位瓶颈环节、找到具体标的、交叉验证风险。在结构化框架里让 AI 做产业链研究员。Invoked by 产业链分析 / 拆产业链 / 瓶颈分析 / 景气度投资 / "帮我拆一下XX产业链". |
+| [`intrinsic-value-analysis`](skills/intrinsic-value-analysis/) | 用老唐（唐朝）估值法分析企业内在价值。以巴菲特/格雷厄姆 DCF 思想的工程化简化为骨架：三大前提排雷 → 把好公司当债券 → 三年后合理估值打五折买入。Invoked by 估值 / 内在价值 / "现在能不能买" / "什么价位卖". |
+| [`company-analyzer`](skills/company-analyzer/) | Analyze a company through three layers — story, logic, judgment — and deliver a narrative-driven report with a clear take. Invoked by "研究 XX 公司" / "深度分析 XX" / "带我看懂 XX 这家公司" or naming a company alongside investment/career/competition context. |
 
 ## Repository layout
 
@@ -40,16 +43,20 @@ ch-skills/
     │   │   └── techniques.md
     │   └── evals/
     │       └── evals.json
-    └── marxist-method-for-action/   # Decision-analysis methodology
+    ├── marxist-method-for-action/   # Decision-analysis methodology
+    │   ├── SKILL.md
+    │   ├── references/
+    │   ├── scripts/
+    │   └── evals/
+    ├── industry-chain-research/     # Industry chain research
+    │   ├── SKILL.md
+    │   └── REFERENCE.md
+    ├── intrinsic-value-analysis/    # Intrinsic value analysis
+    │   └── SKILL.md
+    └── company-analyzer/            # Company deep analysis
         ├── SKILL.md
         ├── references/
-        │   ├── mao-playbook.md
-        │   ├── domain-examples.md
-        │   └── before-after-case-studies.md
-        ├── scripts/
-        │   └── context_questions.py
-        └── evals/
-            └── evals.json
+        └── templates/
 ```
 
 ## Installation
