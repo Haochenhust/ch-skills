@@ -1,0 +1,7 @@
+{
+  "accounts": [],
+  "pull_interval_hours": 24,
+  "data_dir": "./data",
+  "max_articles_per_pull": 100,
+  "pull_concurrency": 4
+}

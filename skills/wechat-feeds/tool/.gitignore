@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+# Lockfile intentionally not committed: keeps installs portable across registries
+# (deps are pinned by ^range in package.json). Delete this line to commit your own lock.
+bun.lock
+
+# Build output
+dist/
+
+# SQLite database (runtime)
+feeds.db
+feeds.db-shm
+feeds.db-wal
+
+# Login session (contains credentials)
+session.json
+
+# Local runtime config (subscription list lives in feeds.db, keep config out too)
+config.json
+
+# Scraped content
+data/
+
+# Keepalive logs
+logs/

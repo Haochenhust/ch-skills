@@ -28,6 +28,7 @@ Claude reads the frontmatter at session start and loads the full body only when 
 | [`industry-chain-research`](skills/industry-chain-research/) | 产业链研究：从宏观趋势拆解产业链、定位瓶颈环节、找到具体标的、交叉验证风险。在结构化框架里让 AI 做产业链研究员。Invoked by 产业链分析 / 拆产业链 / 瓶颈分析 / 景气度投资 / "帮我拆一下XX产业链". |
 | [`intrinsic-value-analysis`](skills/intrinsic-value-analysis/) | 用老唐（唐朝）估值法分析企业内在价值。以巴菲特/格雷厄姆 DCF 思想的工程化简化为骨架：三大前提排雷 → 把好公司当债券 → 三年后合理估值打五折买入。Invoked by 估值 / 内在价值 / "现在能不能买" / "什么价位卖". |
 | [`company-analyzer`](skills/company-analyzer/) | Analyze a company through three layers — story, logic, judgment — and deliver a narrative-driven report with a clear take. Invoked by "研究 XX 公司" / "深度分析 XX" / "带我看懂 XX 这家公司" or naming a company alongside investment/career/competition context. |
+| [`wechat-feeds`](skills/wechat-feeds/) | Maintain a local, incrementally-updated library of WeChat Official Account (公众号) articles as Markdown + a SQLite index, and pull new posts on demand. Bundles a self-contained Bun scraper that drives a logged-in Chrome via a tiny CDP proxy. Invoked by "update my feeds" / "拉一下公众号" / "增量更新公众号文章". |
 
 ## Repository layout
 
@@ -53,10 +54,13 @@ ch-skills/
     │   └── REFERENCE.md
     ├── intrinsic-value-analysis/    # Intrinsic value analysis
     │   └── SKILL.md
-    └── company-analyzer/            # Company deep analysis
+    ├── company-analyzer/            # Company deep analysis
+    │   ├── SKILL.md
+    │   ├── references/
+    │   └── templates/
+    └── wechat-feeds/                # WeChat 公众号 feed library + updater
         ├── SKILL.md
-        ├── references/
-        └── templates/
+        └── tool/                    # self-contained Bun scraper + bundled CDP proxy
 ```
 
 ## Installation
