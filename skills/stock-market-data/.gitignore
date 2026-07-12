@@ -1,0 +1,7 @@
+# Python virtualenv (create locally via: python3 -m venv .venv)
+.venv/
+__pycache__/
+*.pyc
+
+# Runtime cache written by check_trading_day.py
+scripts/.trading_calendar_cache.json

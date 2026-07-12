@@ -30,6 +30,22 @@ Claude reads the frontmatter at session start and loads the full body only when 
 | [`company-analyzer`](skills/company-analyzer/) | Analyze a company through three layers — story, logic, judgment — and deliver a narrative-driven report with a clear take. Invoked by "研究 XX 公司" / "深度分析 XX" / "带我看懂 XX 这家公司" or naming a company alongside investment/career/competition context. |
 | [`wechat-feeds`](skills/wechat-feeds/) | Maintain a local, incrementally-updated library of WeChat Official Account (公众号) articles as Markdown + a SQLite index, and pull new posts on demand. Bundles a self-contained Bun scraper that drives a logged-in Chrome via a tiny CDP proxy. Invoked by "update my feeds" / "拉一下公众号" / "增量更新公众号文章". |
 
+### A-share investment research toolkit
+
+A set of composable skills for A-share (A股) stock research. Analysis skills call the data skills; set your own `TUSHARE_TOKEN` (no credentials are bundled).
+
+| Skill | Purpose |
+|---|---|
+| [`stock-analyzer`](skills/stock-analyzer/) | Deep-dive individual stock analysis across 5 dimensions (business, financials, valuation, catalysts, risks) → structured research note with a clear buy/sell/hold thesis and falsification conditions. Invoked by "分析一下XX股票" / "这只股票能不能买". |
+| [`technical-analyzer`](skills/technical-analyzer/) | Secondary timing tool — MA trend, support/resistance, volume analysis for entry/exit. Never the primary basis. Invoked by "现在能买吗" / "技术面怎么样" / "支撑位在哪". |
+| [`valuation-calculator`](skills/valuation-calculator/) | Relative valuation: PE/PB/PS historical percentiles, peer-comparison tables, PE/PB-based target prices. Distinct from the DCF-style [`intrinsic-value-analysis`](skills/intrinsic-value-analysis/). Invoked by "这只股票贵不贵" / "目标价多少". |
+| [`industry-chain-mapper`](skills/industry-chain-mapper/) | Build & maintain persistent industry-chain map artifacts (upstream/mid/down, key companies, market share, elasticity ranking). Artifact-focused complement to [`industry-chain-research`](skills/industry-chain-research/). Invoked by "梳理一下XX产业链". |
+| [`catalyst-tracker`](skills/catalyst-tracker/) | Forward-looking catalyst calendar (earnings, conferences, policy events) linked to tracked stocks. Invoked by "最近有什么催化剂" / "财报什么时候出". |
+| [`news-scanner`](skills/news-scanner/) | Scan Xueqiu / Eastmoney / 10jqka + web search for investment news by tracked keywords; reports HIGH/MEDIUM signal only. Invoked by "最近有什么新消息" / "扫描一下XX的最新动态". |
+| [`tushare-data`](skills/tushare-data/) | Primary structured A-share data via Tushare Pro — OHLCV, valuation, financial statements, shareholders, forecasts. CLI over the tushare SDK. Requires your own `TUSHARE_TOKEN`. |
+| [`stock-market-data`](skills/stock-market-data/) | Free A-share/US market data via AKShare — trading-day checks, index/sector/limit-up-pool/northbound, per-stock daily OHLCV. No token needed. |
+| [`financial-data-fetcher`](skills/financial-data-fetcher/) | Financial statements + ETF data (Tushare primary, AKShare fallback/ETFs). Orchestrates the two data skills above. |
+
 ## Repository layout
 
 ```
@@ -58,9 +74,19 @@ ch-skills/
     │   ├── SKILL.md
     │   ├── references/
     │   └── templates/
-    └── wechat-feeds/                # WeChat 公众号 feed library + updater
-        ├── SKILL.md
-        └── tool/                    # self-contained Bun scraper + bundled CDP proxy
+    ├── wechat-feeds/                # WeChat 公众号 feed library + updater
+    │   ├── SKILL.md
+    │   └── tool/                    # self-contained Bun scraper + bundled CDP proxy
+    │
+    ├── stock-analyzer/              # ┐ A-share investment research toolkit
+    ├── technical-analyzer/          # │  (analysis skills call the data skills)
+    ├── valuation-calculator/        # │
+    ├── industry-chain-mapper/       # │
+    ├── catalyst-tracker/            # │
+    ├── news-scanner/                # │
+    ├── tushare-data/                # │  Tushare Pro CLI    (SKILL.md + scripts/)
+    ├── stock-market-data/           # │  AKShare CLI        (SKILL.md + scripts/)
+    └── financial-data-fetcher/      # ┘  financials + ETFs  (SKILL.md)
 ```
 
 ## Installation

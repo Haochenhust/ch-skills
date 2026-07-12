@@ -1,0 +1,4 @@
+# Python virtualenv (create locally via: python3 -m venv .venv)
+.venv/
+__pycache__/
+*.pyc
